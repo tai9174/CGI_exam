@@ -1,0 +1,60 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  </head>
+  <body>
+    <h1>ドキュメントルート！！！！！！！！！！！！！</h1>
+
+    <% require 'pg' %>
+
+    <% connection = PG::connect(dbname: "goya") %>
+    <% connection.internal_encoding = "UTF-8" %>
+<!--三行で、pgライブラリをこのhtmlファイル内で使用できるようにし、
+その後connection変数にgoyaデータベースとの接続情報を入れています。 -->
+<!--       <form action="indicate.cgi" method="POST">
+       下記に文字を入力してください<br><br>                       -->
+   <!-- formに囲まれている内容を、indicate.rb(cgi)に送信しますという記述 -->
+<!--      <input type="text"  name="input" ><br>
+      <input type="submit" name="送信" >                        -->
+      <!-- このinputに入力された情報が、submitの送信ボタンでデータとして送られる -->
+      <!-- name='input'は送られた先の目印となる情報 -->
+      <!-- type="text"は入力ができるフォームを作成するという記述 -->
+<!--    </form> -->
+
+    <% result = connection.exec("SELECT * FROM crops WHERE NOT (give_for='自家消費');") %>
+    <% data = [] %>
+
+    <% result.each do |record| %>
+      <%  data << "ゴーヤの大きさ：#{record["weight"]}　譲渡先：#{record["give_for"]}" %>
+    <% end %>
+<!-- result変数にゴーヤの大きさと売った相手の情報のデータを入れ、
+それらの情報をeach文で一つずつdataと言う名前の配列に挿入しています。 -->
+    <form action="goya_sell.cgi" method="POST">
+    下記のボタンを押すと、譲渡先が自家消費ではないゴーヤの情報ページに飛びます<br><br>
+      <input type="text" name="goya" value="<%= data.join(' ') %>">
+      <!-- valueには、送りたいデータを代入する -->
+      <!-- name="goya"を、情報の目印とする -->
+      <input type="submit" name="送信" >
+    </form>
+
+  　<% result = connection.exec("SELECT * FROM crops WHERE quality = false;") %>
+    <% data = [] %>
+
+    <% result.each do |record| %>
+      <%  data << "ゴーヤの大きさ：#{record["weight"]}　譲渡先：#{record["give_for"]}　品質#{record["quality"]}" %>
+    <% end %>
+
+    <form action="goya_false.cgi" method="POST">
+      下記のボタンを押すと、品質が悪いゴーヤの情報ページに飛びます<br><br>
+      <input type="text" name="goya" value="<%= data.join(' ') %>">
+      <!-- valueには、送りたいデータを代入する -->
+      <!-- name="goya"を、情報の目印とする -->
+      <input type="submit" name="送信" >
+    </form>
+    <!--result変数にゴーヤの大きさと売った相手の情報のデータを入れ、
+    それらの情報をeach文で一つずつdataと言う名前の配列に挿入しています。  -->
+  </body>
+</html>
+<!-- 補足１　< % % >で囲むことによって、その文章をrubyのコードとして実行できるようになります。
+< % = %>と書くと、処理の結果得られた値をHTMLに描画（出力）することができます。
+-->
